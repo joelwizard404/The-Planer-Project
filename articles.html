@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Articles - The Planer Project</title>
+  <link rel="icon" type="image/png" href="/media/favicon.png">
+  <link rel="stylesheet" href="/hidden/style.css">
+  <style>
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .search-bar {
+      margin-left: auto;
+    }
+    .search-bar input[type="text"] {
+      padding: 5px;
+      font-size: 14px;
+    }
+    .search-bar button {
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .article-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .article-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .article-card h3 {
+      margin: 10px 0;
+    }
+    .article-card .date {
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/no-js.html">
+  </noscript>
+</head>
+
+<body>
+<div class="container">
+  <header>
+    <img src="/media/NEWBanner2.png" alt="The Planer Project">
+  </header>
+
+  <marquee behavior="scroll" direction="left">
+    Get more Information per our Articles · 1024x768
+  </marquee>
+  <nav>
+    <a href="/index.html">Home</a>
+    <a href="/softwares/PyFood.html">PyFood</a>
+<!--    <a href="/softwares/PyPlan.html">PyPlan</a>-->
+    <a href="/contributing.html">Contribute</a>
+    <a href="/update-logs.html">Update Log</a>
+    <a href="/open-source.html">View Source Code</a>
+    <a href="/FAQ.html">FAQ</a>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search articles...">
+      <button onclick="searchArticles()">Search</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Article detail view (shown when viewing single article) -->
+    <div id="singleArticleView" style="display: none;">
+      <div class="article-header">
+        <div class="article-title" id="articleTitle">Loading Article...</div>
+        <div class="article-meta" id="articleMeta">Published: --/--/----</div>
+      </div>
+
+      <img id="articleImage" class="article-image" src="" alt="Article Image">
+
+      <div class="article-content" id="articleContent">
+        <p>Loading article content...</p>
+      </div>
+
+      <a href="/articles.html" class="back-button">← Back to Articles</a>
+    </div>
+
+    <!-- Articles grid view (shown by default) -->
+    <div id="articlesGrid" class="articles-grid"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-columns">
+
+      <div class="footer-column">
+        <h4>Downloads: PyFood</h4>
+        <a href="/PyFood.html">All releases</a>
+        <a href="/open-source.html">Source code</a>
+        <a href="/PyFood.html">Windows</a>
+      </div>
+
+      <div class="footer-column">
+        <h4>Documentation</h4>
+        <a href="/articles.html">Articles</a>
+        <a href="/update-logs.html">Update Logs</a>
+        <a href="/FAQ.html">FAQ</a>
+      </div>
+
+      <div class="footer-column">
+        <h4>Contributing</h4>
+        <a href="/contributing.html">Fan Made Versions</a>
+        <a href="/contributing.html">Issue Tracker</a>
+        <a href="/contributing.html">Report a Security Issue</a>
+      </div>
+
+      <div class="footer-column">
+        <h4>Legal</h4>
+        <a href="/terms.html">Terms and Conditions</a>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <br>
+      © 2026 The Planer Project · Licensed under The Unlicense
+    </div>
+  </footer>
+</div>
+
+<script>
+// Article database
+const articles = {
+  1: {
+    title: "Updating the way Users can contribute",
+    date: "03-01-2026",
+    image: "/media/articles/contributing1.jpg",
+    content: `
+      <h3>Introduction</h3>
+      <p>We're excited to tell you the changes relating contributing.</p>
+      <h3>What's changed?</h3>
+      <p>We're excited to announce that in the near future, we will completly change the
+      way how Users can contribute their own Ideas to our Software. Before, you could only
+      contribute by sending E-Mails to the Webmaster. We've now setup an GitHub Repo
+      where you fork the Repo.</p>
+      <p>Go to ADD HREF HERE to see it in Action now!</p>
+    `
+  },
+  2: {
+    title: "Updating the way Mobile Users see our Site",
+    date: "01-01-2026",
+    image: "/media/articles/phone.jpg",
+    content: `
+      <h3>Introduction</h3>
+      <p>We are excited to announce that we improved the Site for Mobile Users.</p>
+      <h3>What's changed?</h3>
+      <p>First of all <mark>happy new Year</mark>.
+      We're excited to tell the community about a big change in how Mobile Users see our Site.
+      Before we released this Update Mobile Users would be able to completly see the Site but
+      it was way to small. Now with the new Update everythings optimized for Mobile Users.</p>
+      <p>Switch to a Mobile Device to see it in Action now!</p>
+    `
+  },
+  3: {
+    title: "Changes relating the Open Source Movement",
+    date: "31-12-2025",
+    image: "/media/articles/open_src.jpg",
+    content: `
+      <h3>Introduction</h3>
+      <p>We are excited to announce that we improved how you see the Source Code.</p>
+      <h3>What's changed?</h3>
+      <p>Our code presentation is now properly formatted and readable, helping people understand our structure easily.</p>
+      <p>Head over to our open source Page to see it in action!</p>
+    `
+  },
+};
+
+// Get article ID from URL
+function getArticleId() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  return id && articles[id] ? id : null;
+}
+
+// Display all articles in grid
+function displayAllArticles() {
+  const grid = document.getElementById('articlesGrid');
+  grid.innerHTML = '';
+  
+  for (const [id, article] of Object.entries(articles)) {
+    const card = document.createElement('div');
+    card.className = 'article-card';
+    card.onclick = () => window.location.href = `?id=${id}`;
+    
+    card.innerHTML = `
+      <img src="${article.image}" alt="${article.title}">
+      <h3>${article.title}</h3>
+      <p class="date">${article.date}</p>
+    `;
+    
+    grid.appendChild(card);
+  }
+}
+
+// Load single article
+function loadArticle() {
+  const articleId = getArticleId();
+  
+  if (articleId) {
+    // Show single article view
+    document.getElementById('singleArticleView').style.display = 'block';
+    document.getElementById('articlesGrid').style.display = 'none';
+    
+    const article = articles[articleId];
+    document.getElementById('articleTitle').textContent = article.title;
+    document.getElementById('articleMeta').textContent = `Published: ${article.date} | The Planer Project`;
+    document.getElementById('articleImage').src = article.image;
+    document.getElementById('articleContent').innerHTML = article.content;
+  } else {
+    // Show all articles grid
+    document.getElementById('singleArticleView').style.display = 'none';
+    document.getElementById('articlesGrid').style.display = 'grid';
+    displayAllArticles();
+  }
+}
+
+// Search bar logic
+function searchArticles() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!query) return;
+
+  for (const [id, article] of Object.entries(articles)) {
+    if (article.title.toLowerCase().includes(query)) {
+      window.location.href = `?id=${id}`;
+      return;
+    }
+  }
+
+  alert("There was no Article to be found.");
+}
+
+// Initial load
+loadArticle();
+</script>
+</body>
+</html>

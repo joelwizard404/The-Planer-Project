@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home - The Planer Project</title>
+  <link rel="icon" type="image/png" href="/media/favicon.png">
+  <link rel="stylesheet" href="/hidden/style.css">
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/no-js.html">
+  </noscript>
+</head>
+<body>
+
+<!-- Welcome Banner -->
+<div id="welcomeBanner" class="banner-overlay">
+  <div class="banner-box">
+    <div class="banner-title">⭐ Banners are annoying, support isn't!</div>
+    <div class="banner-content">
+      <p><strong>Like our non-profit open source Project?</strong></p>
+      <p>Consider buying us a coffee via our donation link</p>
+      <p><a href="https://buymeacoffee.com/joelwizard" class="banner-link" target="_blank">☕ Support us</a></p>
+      <p style="font-size: 12px; color: #666; margin-top: 15px;">Not required, but greatly appreciated!</p>
+    </div>
+    <button class="banner-button" onclick="closeWelcomeBanner()">Not today, continue to Site</button>
+  </div>
+</div>
+<!-- Download Banner -->
+<div id="downloadBanner" class="banner-overlay hidden">
+  <div class="banner-box">
+    <div class="banner-title">📥 Thank You for Downloading!</div>
+    <div class="banner-content">
+      <p><strong>Your download should start shortly...</strong></p>
+      <p>Enjoying The Planer Project? Consider buying us a coffee.</p>
+      <p style="margin-top: 10px;"><a href="https://buymeacoffee.com/joelwizard" class="banner-link" target="_blank">☕ Support us</a></p>
+      <p style="font-size: 12px; color: #666; margin-top: 15px;">Not required, but greatly appreciated!</p>
+    </div>
+    <button class="banner-button" onclick="closeDownloadBanner()">Not today, maybe Tommorow</button>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <img src="/media/NEWBanner2.png" alt="The Planer Project">
+  </header>
+  <marquee behavior="scroll" direction="left">
+    Welcome to The Planer Project Archive · 1024x768
+  </marquee>
+  <nav>
+    <a href="/softwares/PyFood.html">PyFood</a>
+<!--    <a href="/softwares/PyPlan.html">PyPlan</a>-->
+    <a href="/contributing.html">Contribute</a>
+    <a href="/articles.html">View Articles</a>
+    <a href="/update-logs.html">Update Log</a>
+    <a href="/open-source.html">View Source Code</a>
+    <a href="/FAQ.html">FAQ</a>
+  </nav>
+  <main>
+    <section id="featured-article">
+      <h2>Featured Article</h2>
+      <div class="featured-article" onclick="window.location.href='articles.html?id=2'">
+        <img src="/media/articles/phone.jpg" alt="Picture couldn't load. Your Internet is REALLY bad lol" class="article-image-large">
+        <div class="article-title-large">Updating the Way Mobile Users see our Site</div>
+        <div class="article-description-large">
+          We're excited to tell the community about a big change in how Mobile Users see our Site.
+          Before we released this Update, Mobile Users would be able to completly see the Site but everything...
+        </div>
+        <div class="article-meta">Published: 01-01-2026 | Click to read more →</div>
+      </div>
+    </section>
+    
+    <section id="downloads">
+      <h2>Available Downloads</h2>
+      <table>
+        <tr>
+          <th>Software</th>
+          <th>Version</th>
+          <th>Release Date</th>
+          <th>More Info</th>
+          <th>Download</th>
+        </tr>
+        <tr>
+          <td>PyFood ENHANCED</td>
+          <td>1 Visual</td>
+          <td>26-12-2025</td>
+          <td>Anti Piracy Code: N0nP1r@c!</td>
+          <td><a href="downloads/PyFood 1.0.zip" class="download" download>Download (.exe)</a></td>
+        </tr>
+        <tr>
+          <td>PyFood LEGACY</td>
+          <td>3 Visual</td>
+          <td>2020</td>
+          <td>!forceunlock to bypass Activation Code</td>
+          <td><a href="downloads/PyFoodLegacyEN.zip" class="download" download>Download (.exe)</a></td>
+        </tr>
+      </table>
+    </section>
+    <section id="about">
+      <h2>About</h2>
+      <p>
+        This Website is a preserve for the Planer Project and it's Services. All Services (up to current date: 30.12.25)
+        are licensed under The Unlicense. The Planer Project is a project build to make your Life easier. Plan your every
+        single thing with our wide range of Planer Softwares such as PyFood and PyPlan.
+      </p>
+    </section>
+    <section id="UpdateLog">
+      <h2>Update Logs</h2>
+      <p><mark>i:</mark> Go to <a href="/update-logs.html">Update Logs</a> for all Logs and more Information regarding them.</p>
+      <p>PyFood Enhanced Vers 1 >> We've enhanced the Graphical User Interface</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+  <div class="footer-columns">
+
+    <div class="footer-column">
+      <h4>Downloads: PyFood</h4>
+      <a href="/PyFood.html">All releases</a>
+      <a href="/open-source.html">Source code</a>
+      <a href="/PyFood.html">Windows</a>
+    </div>
+
+    <div class="footer-column">
+      <h4>Documentation</h4>
+      <a href="/articles.html">Articles</a>
+      <a href="/update-logs.html">Update Logs</a>
+      <a href="/FAQ.html">FAQ</a>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contributing</h4>
+      <a href="/contributing.html">Fan Made Versions</a>
+      <a href="/contributing.html">Issue Tracker</a>
+      <a href="/contributing.html">Report a Security Issue</a>
+    </div>
+
+    <div class="footer-column">
+      <h4>Legal</h4>
+      <a href="/terms.html">Terms and Conditions</a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <br>
+    © 2026 The Planer Project · Licensed under The Unlicense
+  </div>
+  </footer>
+
+<script>
+function closeWelcomeBanner() {
+  document.getElementById('welcomeBanner').classList.add('hidden');
+  setVisited();
+}
+
+function closeDownloadBanner() {
+  document.getElementById('downloadBanner').classList.add('hidden');
+}
+
+function showDownloadBanner() {
+
+  document.getElementById('downloadBanner').classList.remove('hidden')
+}
+
+document.getElementById('welcomeBanner').classList.remove('hidden');
+
+const links = document.querySelectorAll(".download");
+links.forEach(link => {
+  link.addEventListener("click", (e) => {
+    console.log("Download started:", link.getAttribute("href"));
+    
+    setTimeout(() => {
+      showDownloadBanner();
+    }, 500);
+  });
+});
+</script>
+</body>
+</html>

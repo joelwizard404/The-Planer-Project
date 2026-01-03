@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>no JavaScript</title>
+  <link rel="icon" type="image/png" href="/media/favicon.png">
+  <link rel="stylesheet" href="/hidden/style.css">
+  <style>
+    .error-box {
+      background-color: #fff;
+      border: 2px dashed #000;
+      padding: 20px;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .error-code {
+      font-size: 48px;
+      font-weight: bold;
+      color: darkred;
+    }
+
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
+
+    #visitor-counter {
+      font-family: monospace;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    #email-counter {
+        font-family: monospace;
+        margin-top: 10px;
+        font-size: 16px;
+    }
+    .xp-window {
+        position: fixed;
+        width: 260px;
+        background: #ece9d8;
+        border: 2px solid #000080;
+        font-family: Tahoma, sans-serif;
+        font-size: 12px;
+        z-index: 9999;
+    }
+
+    .xp-title {
+        background: linear-gradient(#000080, #0000aa);
+        color: white;
+        padding: 4px;
+        font-weight: bold;
+    }
+
+    .xp-body {
+        padding: 10px;
+    }
+
+    .xp-btn {
+        margin-top: 10px;
+        padding: 2px 10px;
+    }
+
+    @keyframes bwBlink {
+        0%   { filter: grayscale(0%); }
+        50%  { filter: grayscale(100%) brightness(0); }
+        100% { filter: grayscale(0%); }
+    }
+
+    .bw-blink {
+        animation: bwBlink 1s steps(1, end) infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bw-blink {
+            animation: none !important;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <img src="NEWBanner2.png" alt="The Planer Project">
+  </header>
+
+  <marquee behavior="alternate">
+    ERROR · JavaScript deactivated · ERROR · JavaScript deactivated
+  </marquee>
+
+  <main>
+    <div class="error-box">
+      <div class="error-code blink">JavaScript deactivated</div>
+      <p><b>Please reactive JavaScript to use The Planer Project</b></p>
+      <p>We know you like safety but you need to reactivate it</p>
+      <a href="/index.html"><b>Try again, Mr. Robot</b></a>
+    </div>
+  </main>
+
+  <footer>
+    © 2026 The Planer Project
+  </footer>
+</body>
+</html>

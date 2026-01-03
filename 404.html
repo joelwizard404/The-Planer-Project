@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>404 - The Planer Project</title>
+  <link rel="icon" type="image/png" href="/media/favicon.png">
+  <link rel="stylesheet" href="/hidden/style.css">
+  <style>
+    .error-box {
+      background-color: #fff;
+      border: 2px dashed #000;
+      padding: 20px;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .error-code {
+      font-size: 48px;
+      font-weight: bold;
+      color: darkred;
+    }
+
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
+
+    #visitor-counter {
+      font-family: monospace;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    #email-counter {
+        font-family: monospace;
+        margin-top: 10px;
+        font-size: 16px;
+    }
+    .xp-window {
+        position: fixed;
+        width: 260px;
+        background: #ece9d8;
+        border: 2px solid #000080;
+        font-family: Tahoma, sans-serif;
+        font-size: 12px;
+        z-index: 9999;
+    }
+
+    .xp-title {
+        background: linear-gradient(#000080, #0000aa);
+        color: white;
+        padding: 4px;
+        font-weight: bold;
+    }
+
+    .xp-body {
+        padding: 10px;
+    }
+
+    .xp-btn {
+        margin-top: 10px;
+        padding: 2px 10px;
+    }
+
+    @keyframes bwBlink {
+        0%   { filter: grayscale(0%); }
+        50%  { filter: grayscale(100%) brightness(0); }
+        100% { filter: grayscale(0%); }
+    }
+
+    .bw-blink {
+        animation: bwBlink 1s steps(1, end) infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .bw-blink {
+            animation: none !important;
+        }
+    }
+</style>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/no-js.html">
+  </noscript>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <img src="NEWBanner2.png" alt="The Planer Project">
+  </header>
+
+  <marquee behavior="alternate">
+    ERROR · FILE NOT FOUND · ERROR · FILE NOT FOUND
+  </marquee>
+
+  <main>
+    <div class="error-box">
+      <div class="error-code blink">404</div>
+      <p><b>File not found</b></p>
+
+      <p id="random-message">Loading error message...</p>
+
+      <div id="countdown" style="margin-top:10px; font-weight:bold;">
+        Redirecting in 15 seconds...
+      </div>
+
+      <p style="margin-top:15px;">
+        <a href="index.html">Return to main page</a> ·
+        <a id="angry-mail" href="#">Send angry email to webmaster</a>
+      </p>
+
+      <div id="visitor-counter">Visitors: 999999</div>
+      <div id="email-counter">Angry Emails send to webmaster: 0</div>
+
+    </div>
+  </main>
+
+  <footer>
+    © 2026 The Planer Project
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    const SAFE_MODE = false;
+    const morningMessages = ["Good morning. Your page is still missing.", "404 – Even the server just woke up.", "This page overslept."];
+    const dayMessages = ["This page was eaten by a bug.", "404 – The hamster is on lunch break.", "This file does not exist. Like Internet Explorer updates.", "You broke the internet. Congratulations."];
+    const nightMessages = ["404 – The server is asleep.", "This page disappeared into the void.", "Error: Dreams not found.", "It's dark. The page is gone."];
+
+    const msgElement = document.getElementById("random-message");
+    const countdownElement = document.getElementById("countdown");
+    const angryMail = document.getElementById("angry-mail");
+    const visitorCounter = document.getElementById("visitor-counter");
+    const emailCounter = document.getElementById("email-counter");
+
+    if (msgElement) {
+      const hour = new Date().getHours();
+      let messages;
+      if (hour >= 5 && hour < 11) messages = morningMessages;
+      else if (hour >= 11 && hour < 18) messages = dayMessages;
+      else messages = nightMessages;
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      msgElement.innerHTML = messages[randomIndex];
+    }
+
+    if (angryMail) {
+      angryMail.addEventListener("click", () => {
+        const subjects = ["Your website is broken", "404 AGAIN", "Fix your server", "Internet ruined", "Extremely disappointed"];
+        const bodies = ["Hello Webmaster,%0D%0A%0D%0AYour website is broken.%0D%0A404.%0D%0APlease fix immediately.%0D%0A%0D%0AAngry User", "Hi,%0D%0AThe page is missing.%0D%0AI am upset.%0D%0ARegards.", "404.%0D%0AThat's it.%0D%0AI'm done."];
+        const subject = subjects[Math.floor(Math.random() * subjects.length)];
+        const body = bodies[Math.floor(Math.random() * bodies.length)];
+        window.location.href = `mailto:foldix@tuta.io?subject=${subject}&body=${body}`;
+      });
+    }
+
+    let seconds = 15;
+    if (countdownElement) {
+      const interval = setInterval(() => {
+        seconds--;
+        countdownElement.textContent = `Redirecting in ${seconds} seconds...`;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          window.location.href = "index.html";
+        }
+      }, 1000);
+    }
+
+    let visitors = 999999;
+    if (visitorCounter) {
+      setInterval(() => {
+        visitors = visitors > 0 ? visitors - 531 : 0; // more natural than 500 xD
+        visitorCounter.textContent = `Visitors: ${visitors}`;
+      }, 4);
+    }
+
+    let emails = 0;
+
+    if (emailCounter) {
+        setInterval(() => {
+            emails += Math.floor(Math.random() * 32) + 1;
+            emailCounter.textContent =
+                `Angry Emails sent to webmaster: ${emails}`;
+        }, 200);
+    }
+
+    if (angryMail && emailCounter) {
+        angryMail.addEventListener("click", () => {
+            emails += Math.floor(Math.random() * 10) + 5;
+            emailCounter.textContent =
+                `Angry Emails sent to webmaster: ${emails}`;
+        });
+    }
+
+    function spawnXpPopup() {
+    const win = document.createElement("div");
+    win.className = "xp-window";
+
+    win.style.left = Math.random() * (window.innerWidth - 260) + "px";
+    win.style.top = Math.random() * (window.innerHeight - 120) + "px";
+
+    win.innerHTML = `
+        <div class="xp-title">Error</div>
+        <div class="xp-body">
+            You are an idiot.<br><br>
+            <button class="xp-btn">Oh Oh...</button>
+        </div>
+    `;
+
+    if (!SAFE_MODE && Math.random() < 0.5) {
+        win.classList.add("bw-blink");
+    }
+
+    document.body.appendChild(win);
+
+    let dx = (Math.random() * 6 + 4) * (Math.random() < 0.5 ? -1 : 1);
+    let dy = (Math.random() * 6 + 4) * (Math.random() < 0.5 ? -1 : 1);
+
+    setInterval(() => {
+        const rect = win.getBoundingClientRect();
+        if (rect.left <= 0 || rect.right >= window.innerWidth) dx *= -1;
+        if (rect.top <= 0 || rect.bottom >= window.innerHeight) dy *= -1;
+        win.style.left = rect.left + dx + "px";
+        win.style.top = rect.top + dy + "px";
+    }, 16);
+
+    win.querySelector(".xp-btn").onclick = () => {
+        spawnXpPopup();
+        spawnXpPopup();
+    };
+}
+
+    setTimeout(() => {
+        setInterval(spawnXpPopup, 1200);
+    }, 1000);
+
+
+
+  </script>
+</body>
+</html>
