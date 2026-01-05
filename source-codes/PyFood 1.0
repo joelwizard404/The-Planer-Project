@@ -1,0 +1,586 @@
+import tkinter as tk
+from tkinter import messagebox, simpledialog, scrolledtext
+import random
+import json
+import os
+import getpass
+import pickle
+import sys
+
+# --- CONFIGURATION & GLOBAL VARIABLES ---
+USERNAME = getpass.getuser()
+
+# Persistent saving with User Profile (hidden)
+APPDATA_DIR = os.path.join(os.path.expanduser("~"), ".PyFood_1")
+SAVE_FILE = os.path.join(APPDATA_DIR, "data.bin")
+
+# Available Codes
+AVAILABLE_CODES = {
+    "LILLI_STAR1": {"type": "joker", "value": 1},
+    "Holly Jolly Christmas": {"type": "joker", "value": 1},
+    "<< dev add jokers__10__": {"type": "joker", "value": 10},
+}
+
+# Integrated Default Data
+EMBEDDED_DATA = {
+    "joker": 1,
+    "jokers_used": 0,
+    "numberdata": 2,
+    "VERS": "LEGACY",
+    "locked?": "True",
+    "used_codes": [],
+    "completed_quizzes": [],
+    "meals": [],
+    "healthy_meals": []
+}
+
+class EssensplanerApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title(f"PyFood 1.0 - {USERNAME}")
+        self.root.geometry("600x750")
+        self.root.configure(bg="#5f7994")
+
+        # Basic stats
+        self.joker_val = 1
+        self.used_joker_val = 0
+        self.version = "PyFood 1.0"
+        self.locked = "True"
+        self.used_codes = set()
+        self.completed_quizzes = set()
+        self.number_data = 1
+        self.meals = []
+        self.healthy_meals = []
+
+        # Load data
+        self.load_data()
+
+        # Start GUI building
+        if self.locked == "True":
+            self.build_lock_screen()
+        else:
+            self.build_main_interface()
+
+    # --- DATA MANAGEMENT ---
+    def load_data(self):
+        """Loads data from hidden folder including User Profile"""
+        # Creates hidden folder if non-existing
+        if not os.path.exists(APPDATA_DIR):
+            os.makedirs(APPDATA_DIR)
+        
+        # Try to call data
+        if os.path.exists(SAVE_FILE):
+            try:
+                with open(SAVE_FILE, 'rb') as f:
+                    data = pickle.load(f)
+                    self.joker_val = data.get('joker', 1)
+                    self.used_joker_val = data.get('jokers_used', 0)
+                    self.version = data.get('VERS', "LEGACY")
+                    self.locked = data.get('locked?', "True")
+                    self.used_codes = set(data.get('used_codes', []))
+                    self.completed_quizzes = set(data.get('completed_quizzes', []))
+                    self.number_data = data.get('numberdata', 1)
+                    self.meals = data.get('meals', [])
+                    self.healthy_meals = data.get('healthy_meals', [])
+                    return
+            except Exception as e:
+                print(f"Error loading data: {e}")
+        
+        # Fallback: Load Basic Stats
+        data = EMBEDDED_DATA
+        self.joker_val = data.get('joker', 1)
+        self.used_joker_val = data.get('jokers_used', 0)
+        self.version = data.get('VERS', "LEGACY")
+        self.locked = data.get('locked?', "True")
+        self.used_codes = set(data.get('used_codes', []))
+        self.completed_quizzes = set(data.get('completed_quizzes', []))
+        self.number_data = data.get('numberdata', 1)
+        self.meals = data.get('meals', [])
+        self.healthy_meals = data.get('healthy_meals', [])
+
+    def save_data(self):
+        """Persistent data saving in hidden folder"""
+        data = {
+            'joker': self.joker_val,
+            'jokers_used': self.used_joker_val,
+            'numberdata': self.number_data + 1,
+            'VERS': self.version,
+            'locked?': self.locked,
+            'used_codes': list(self.used_codes),
+            'completed_quizzes': list(self.completed_quizzes),
+            'meals': self.meals,
+            'healthy_meals': self.healthy_meals
+        }
+        try:
+            # Create folder if non-existing
+            if not os.path.exists(APPDATA_DIR):
+                os.makedirs(APPDATA_DIR)
+            
+            # Save as binary
+            with open(SAVE_FILE, 'wb') as f:
+                pickle.dump(data, f)
+            
+            self.update_status_labels()
+        except Exception as e:
+            print(f"ErrorWizard: Data not saved! {e}")
+
+    # --- GUI BUILDER: LOCK SCREEN ---
+    def build_lock_screen(self):
+        self.clear_window()
+        center_frame = tk.Frame(self.root, bg="#2c3e50")
+        center_frame.pack(expand=True)
+
+        tk.Label(center_frame, text="🔒 Anti Piracy Protection", font=("Helvetica", 24, "bold"), bg="#2c3e50", fg="red").pack(pady=20)
+        tk.Label(center_frame, text="Please enter the code provided on our website to unlock PyFood:", bg="#2c3e50", fg="white").pack()
+        
+        self.code_entry = tk.Entry(center_frame, font=("Helvetica", 14), show="*")
+        self.code_entry.pack(pady=10)
+        self.code_entry.bind('<Return>', self.check_activation_code)
+
+        tk.Button(center_frame, text="Unlock", command=self.check_activation_code, bg="#27ae60", fg="white", width=15).pack(pady=10)
+        tk.Button(center_frame, text="Key Help", command=lambda: messagebox.showinfo("Help", "Get the code on our website in the More Info tab"), bg="#95a5a6", width=15).pack()
+
+    def check_activation_code(self, event=None):
+        code = self.code_entry.get().strip()
+        if code == "N0nP1r@c!": # <---------------------------------------------------------------------- CODE -------------------------------------------------------------->
+            self.locked = "False"
+            self.save_data()
+            messagebox.showinfo("Successfully Verified", "Welcome to PyFood 1.0!")
+            self.build_main_interface()
+        else:
+            messagebox.showerror("Error", "Invalid activation code. If error persists, please re-download the software.")
+
+    # --- GUI BUILDER: MAIN INTERFACE ---
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def update_status_labels(self):
+        if hasattr(self, 'lbl_meals'):
+            self.lbl_meals.config(text=f"All your Recipes: {len(self.meals) + len(self.healthy_meals)}")
+
+    def log_output(self, text):
+        self.log_listbox.insert(tk.END, text)
+        self.log_listbox.see(tk.END)
+
+    def build_main_interface(self):
+        self.clear_window()
+
+        # 1. Header
+        header = tk.Frame(self.root, bg="#34495e", pady=10)
+        header.pack(fill="x", side="top")
+        
+        tk.Label(header, text=f"PyFood 1.0", font=("Helvetica", 16, "bold"), bg="#34495e", fg="white").pack()
+        
+        stats_frame = tk.Frame(header, bg="#34495e")
+        stats_frame.pack(pady=5)
+        
+        self.lbl_meals = tk.Label(stats_frame, text=f"Recipes: {len(self.meals) + len(self.healthy_meals)}", font=("Helvetica", 12), bg="#34495e", fg="#3498db")
+        self.lbl_meals.pack(side="left", padx=20)
+
+        # Burger Menu Button (top right)
+        menu_btn = tk.Button(header, text="☰", command=self.show_burger_menu, 
+                            bg="#2c3e50", fg="white", font=("Arial", 16, "bold"), 
+                            width=3, relief="flat", cursor="hand2")
+        menu_btn.place(relx=1.0, rely=0.5, anchor="e", x=-10)
+
+        # 2. Log Area (Listbox instead of ScrolledText)
+        log_frame = tk.Frame(self.root, bg="#2c3e50")
+        log_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        tk.Label(log_frame, text="📋 Activity Log", font=("Helvetica", 12, "bold"), bg="#2c3e50", fg="white").pack(anchor="w", pady=5)
+        
+        scrollbar = tk.Scrollbar(log_frame)
+        scrollbar.pack(side="right", fill="y")
+        
+        self.log_listbox = tk.Listbox(log_frame, font=("Consolas", 10), bg="#ecf0f1", fg="#2c3e50", 
+                                       yscrollcommand=scrollbar.set, height=12, bd=0, highlightthickness=0)
+        self.log_listbox.pack(fill="both", expand=True)
+        scrollbar.config(command=self.log_listbox.yview)
+
+        # 3. Buttons Frame - All buttons same size
+        btn_frame = tk.Frame(self.root, bg="#2c3e50", pady=10)
+        btn_frame.pack(fill="x", side="bottom", padx=10)
+
+        # Configure grid to make all columns equal width
+        btn_frame.grid_columnconfigure(0, weight=1, uniform="button")
+        btn_frame.grid_columnconfigure(1, weight=1, uniform="button")
+
+        # All buttons with same configuration
+        button_config = {
+            'bg': '#6d6d6d',
+            'fg': 'white',
+            'font': ('Arial', 10, 'bold'),
+            'height': 2,
+            'width': 20
+        }
+
+        # First row
+        tk.Button(btn_frame, text="🍔 Food Generator", command=self.generate_meal, **button_config).grid(row=0, column=0, padx=2, pady=2, sticky='ew')
+        tk.Button(btn_frame, text="🥗 Healthy Food Generator", command=self.generate_healthy, **button_config).grid(row=0, column=1, padx=2, pady=2, sticky='ew')
+        
+        # Second row
+        tk.Button(btn_frame, text="➕ Add Recipe", command=self.add_recipe, **button_config).grid(row=1, column=0, padx=2, pady=2, sticky='ew')
+        tk.Button(btn_frame, text="📋 Show All Recipes", command=self.show_recipes, **button_config).grid(row=1, column=1, padx=2, pady=2, sticky='ew')
+        
+        # Third row
+        tk.Button(btn_frame, text="🎟️ Redeem Code", command=self.redeem_code, **button_config).grid(row=2, column=0, padx=2, pady=2, sticky='ew')
+        tk.Button(btn_frame, text="❓ Take Quiz", command=self.start_quiz, **button_config).grid(row=2, column=1, padx=2, pady=2, sticky='ew')
+
+        self.log_output(f"Welcome back, {USERNAME}! {len(self.completed_quizzes)}/40 Quizzes completed")
+
+    # --- FUNCTIONS ---
+    def generate_meal(self):
+        if len(self.meals) == 0:
+            messagebox.showwarning("Food Generator - WARNING", "It seems like you haven't added any recipes yet! Add a recipe and try again.")
+            return
+        
+        meal = random.choice(self.meals)
+        self.log_output(f"🍔 Today's food is: {meal}")
+
+    def generate_healthy(self):
+        if len(self.healthy_meals) == 0:
+            messagebox.showwarning("Healthy Food Generator - WARNING", "It seems like you haven't added any recipes yet! Add a recipe and try again.")
+            return
+        
+        meal = random.choice(self.healthy_meals)
+        self.log_output(f"🥗 Today's healthy food is: {meal}")
+
+    def add_recipe(self):
+        """Add recipe dialog"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Add Recipe")
+        dialog.geometry("400x250")
+        dialog.configure(bg="#34495e")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        tk.Label(dialog, text="Add New Recipe", font=("Helvetica", 14, "bold"), bg="#34495e", fg="white").pack(pady=10)
+
+        tk.Label(dialog, text="What's the recipe called?", bg="#34495e", fg="white").pack(pady=5)
+        recipe_entry = tk.Entry(dialog, font=("Helvetica", 12), width=30)
+        recipe_entry.pack(pady=5)
+        recipe_entry.focus()
+
+        tk.Label(dialog, text="Category:", bg="#34495e", fg="white").pack(pady=5)
+        
+        category_var = tk.StringVar(value="normal")
+        
+        radio_frame = tk.Frame(dialog, bg="#34495e")
+        radio_frame.pack(pady=10)
+        
+        tk.Radiobutton(radio_frame, text="Normal", variable=category_var, value="normal", bg="#34495e", fg="white", selectcolor="#2c3e50", font=("Helvetica", 11)).pack(side="left", padx=10)
+        tk.Radiobutton(radio_frame, text="Healthy", variable=category_var, value="healthy", bg="#34495e", fg="white", selectcolor="#2c3e50", font=("Helvetica", 11)).pack(side="left", padx=10)
+
+        def save_recipe():
+            recipe_name = recipe_entry.get().strip()
+            if not recipe_name:
+                messagebox.showwarning("Error", "Please enter a recipe name!")
+                return
+            
+            category = category_var.get()
+            
+            if category == "healthy":
+                if recipe_name not in self.healthy_meals:
+                    self.healthy_meals.append(recipe_name)
+                    self.log_output(f"✅ Healthy recipe added: {recipe_name}")
+                else:
+                    messagebox.showinfo("Info", "Recipe already exists!")
+                    return
+            else:
+                if recipe_name not in self.meals:
+                    self.meals.append(recipe_name)
+                    self.log_output(f"✅ Recipe added: {recipe_name}")
+                else:
+                    messagebox.showinfo("Info", "Recipe already exists!")
+                    return
+            
+            self.save_data()
+            dialog.destroy()
+
+        btn_frame = tk.Frame(dialog, bg="#34495e")
+        btn_frame.pack(pady=15)
+        
+        tk.Button(btn_frame, text="Cancel", command=dialog.destroy, bg="#95a5a6", fg="white", width=12).pack(side="left", padx=5)
+        tk.Button(btn_frame, text="Add", command=save_recipe, bg="#27ae60", fg="white", width=12).pack(side="left", padx=5)
+
+        recipe_entry.bind('<Return>', lambda e: save_recipe())
+
+    def show_recipes(self):
+        """Shows all recipes in a dialog"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Manage Recipes")
+        dialog.geometry("500x600")
+        dialog.configure(bg="#34495e")
+        
+        tk.Label(dialog, text="📋 Manage Recipes", font=("Helvetica", 16, "bold"), bg="#34495e", fg="white").pack(pady=10)
+
+        # Notebook/Tabs
+        notebook_frame = tk.Frame(dialog, bg="#34495e")
+        notebook_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Normal recipes
+        tk.Label(notebook_frame, text="🍔 Normal Recipes", font=("Helvetica", 12, "bold"), bg="#34495e", fg="#3498db").pack(anchor="w", pady=5)
+        
+        normal_frame = tk.Frame(notebook_frame, bg="#2c3e50")
+        normal_frame.pack(fill="both", expand=True, pady=5)
+        
+        normal_scroll = scrolledtext.ScrolledText(normal_frame, height=10, font=("Consolas", 10), bg="#ecf0f1", fg="#2c3e50")
+        normal_scroll.pack(fill="both", expand=True)
+        
+        if self.meals:
+            for i, meal in enumerate(self.meals, 1):
+                normal_scroll.insert(tk.END, f"{i}. {meal}\n")
+        else:
+            normal_scroll.insert(tk.END, "No recipes")
+        normal_scroll.configure(state='disabled')
+
+        # Healthy recipes
+        tk.Label(notebook_frame, text="🥗 Healthy Recipes", font=("Helvetica", 12, "bold"), bg="#34495e", fg="#2ecc71").pack(anchor="w", pady=5)
+        
+        healthy_frame = tk.Frame(notebook_frame, bg="#2c3e50")
+        healthy_frame.pack(fill="both", expand=True, pady=5)
+        
+        healthy_scroll = scrolledtext.ScrolledText(healthy_frame, height=10, font=("Consolas", 10), bg="#ecf0f1", fg="#2c3e50")
+        healthy_scroll.pack(fill="both", expand=True)
+        
+        if self.healthy_meals:
+            for i, meal in enumerate(self.healthy_meals, 1):
+                healthy_scroll.insert(tk.END, f"{i}. {meal}\n")
+        else:
+            healthy_scroll.insert(tk.END, "No recipes")
+        healthy_scroll.configure(state='disabled')
+
+        # Buttons
+        btn_frame = tk.Frame(dialog, bg="#34495e")
+        btn_frame.pack(pady=10)
+        
+        tk.Button(btn_frame, text="❌ Delete Recipe", command=lambda: self.delete_recipe(dialog), bg="#e74c3c", fg="white", width=15).pack(side="left", padx=5)
+        tk.Button(btn_frame, text="Close", command=dialog.destroy, bg="#95a5a6", fg="white", width=15).pack(side="left", padx=5)
+
+    def delete_recipe(self, parent_dialog):
+        """Deletes a recipe"""
+        recipe = simpledialog.askstring("Delete Recipe", "Type the recipe name:", parent=parent_dialog)
+        if not recipe:
+            return
+        
+        recipe = recipe.strip()
+        
+        if recipe in self.meals:
+            self.meals.remove(recipe)
+            self.log_output(f"🗑️ Recipe deleted: {recipe}")
+            self.save_data()
+            parent_dialog.destroy()
+            self.show_recipes()
+        elif recipe in self.healthy_meals:
+            self.healthy_meals.remove(recipe)
+            self.log_output(f"🗑️ Healthy recipe deleted: {recipe}")
+            self.save_data()
+            parent_dialog.destroy()
+            self.show_recipes()
+        else:
+            messagebox.showerror("Error", "Recipe not found!")
+
+    def redeem_code(self):
+        code = simpledialog.askstring("Redeem Code", "Enter code:")
+        if not code: 
+            return
+        
+        if code in self.used_codes:
+            messagebox.showwarning("Info", "Code already redeemed!")
+            return
+
+        if code in AVAILABLE_CODES:
+            data = AVAILABLE_CODES[code]
+            self.used_codes.add(code)
+            
+            if data["type"] == "joker":
+                self.joker_val += data["value"]
+                self.log_output(f"✅ Code redeemed: +{data['value']} Joker")
+            
+            self.save_data()
+        else:
+            messagebox.showerror("Error", "Invalid code!")
+
+    def show_credits(self):
+        info = (
+            f"Version: ENHANCED 1\n"
+            "Scripting: Joel\n"
+            f"Quizzes completed: {len(self.completed_quizzes)}/40\n"
+            f"Recipes: {len(self.meals) + len(self.healthy_meals)}"
+        )
+        messagebox.showinfo("Credits", info)
+
+    def show_burger_menu(self):
+        """Shows the burger menu"""
+        menu_window = tk.Toplevel(self.root)
+        menu_window.title("Menu")
+        menu_window.geometry("300x200")
+        menu_window.configure(bg="#34495e")
+        menu_window.transient(self.root)
+        menu_window.grab_set()
+        
+        # Position top right from main window
+        x = self.root.winfo_x() + self.root.winfo_width() - 320
+        y = self.root.winfo_y() + 50
+        menu_window.geometry(f"+{x}+{y}")
+        
+        tk.Label(menu_window, text="☰ Menu", font=("Helvetica", 16, "bold"), 
+                bg="#34495e", fg="white").pack(pady=15)
+        
+        tk.Button(menu_window, text="ℹ️  Credits / Info", command=lambda: [menu_window.destroy(), self.show_credits()], 
+                 bg="#6d6d6d", fg="white", font=("Arial", 11, "bold"), 
+                 width=20, height=2).pack(pady=5)
+        
+        tk.Button(menu_window, text="☠️  RESET DATA", command=lambda: [menu_window.destroy(), self.reset_data_confirm()], 
+                 bg="#e74c3c", fg="white", font=("Arial", 11, "bold"), 
+                 width=20, height=2).pack(pady=5)
+        
+        tk.Button(menu_window, text="Close", command=menu_window.destroy, 
+                 bg="#95a5a6", fg="white", font=("Arial", 10), 
+                 width=20).pack(pady=10)
+
+    def reset_data_confirm(self):
+        """Reset with CONFIRM input"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("⚠️ WARNING")
+        dialog.geometry("400x200")
+        dialog.configure(bg="#e74c3c")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        tk.Label(dialog, text="⚠️ RESET ALL DATA", font=("Helvetica", 16, "bold"), 
+                bg="#e74c3c", fg="white").pack(pady=15)
+        
+        tk.Label(dialog, text="Type 'CONFIRM' to reset all data:", 
+                bg="#e74c3c", fg="white", font=("Helvetica", 11)).pack(pady=5)
+        
+        confirm_entry = tk.Entry(dialog, font=("Helvetica", 14), width=20, justify="center")
+        confirm_entry.pack(pady=10)
+        confirm_entry.focus()
+        
+        def check_confirm():
+            if confirm_entry.get().strip() == "CONFIRM":
+                self.joker_val = 1
+                self.used_codes = set()
+                self.completed_quizzes = set()
+                self.meals = []
+                self.healthy_meals = []
+                self.locked = "True"
+                
+                # Delete saved data
+                try:
+                    if os.path.exists(SAVE_FILE):
+                        os.remove(SAVE_FILE)
+                except:
+                    pass
+                
+                self.save_data()
+                self.log_output("Data reset successfully.")
+                dialog.destroy()
+                self.build_lock_screen()
+            else:
+                messagebox.showerror("Error", "You must type 'CONFIRM' exactly!")
+        
+        btn_frame = tk.Frame(dialog, bg="#e74c3c")
+        btn_frame.pack(pady=10)
+        
+        tk.Button(btn_frame, text="Cancel", command=dialog.destroy, 
+                 bg="#95a5a6", fg="white", width=12, font=("Arial", 10, "bold")).pack(side="left", padx=5)
+        tk.Button(btn_frame, text="RESET", command=check_confirm, 
+                 bg="#c0392b", fg="white", width=12, font=("Arial", 10, "bold")).pack(side="left", padx=5)
+        
+        confirm_entry.bind('<Return>', lambda e: check_confirm())
+
+    def reset_data(self):
+        """Old reset_data method - no longer used"""
+        pass
+
+    # --- QUIZ LOGIC ---
+    def start_quiz(self):
+        if len(self.completed_quizzes) >= 40:
+            messagebox.showinfo("Info", "You have completed all quizzes! 🏆")
+            return
+
+        available = [q for q in range(1, 41) if q not in self.completed_quizzes]
+        if not available: 
+            return
+
+        q_num = random.choice(available)
+        self.run_quiz_dialog(q_num)
+
+    def run_quiz_dialog(self, q_num):
+        questions = {
+            1: ("How do you define variables in Python?", ["A: NAME = \"VALUE\"", "B: \"VALUE\" = NAME", "C: const"], "A"),
+            2: ("'Calculator' in Latin?", ["A: computatrum", "B: computare", "C: computus"], "C"),
+            3: ("How does a syntax error occur?", ["A: If 'Syntax' is written wrong", "B: If the code has errors", "C: Wrong file extension (e.g. .html)"], "B"),
+            4: ("First 4 digits of PI?", ["A: 3.142", "B: 3.141", "C: 3.143"], "B"),
+            5: ("'I love goats' in Latin?", ["A: Amo hircos", "B: Amo boves", "C: Amo porcos"], "A"),
+            6: ("What's the biggest organ in a human?", ["A: Skin", "B: Lung", "C: Heart"], "A"),
+            7: ("Capital of France?", ["A: Lyon", "B: Paris", "C: Marseille"], "B"),
+            8: ("Who painted the Mona Lisa?", ["A: Michelangelo", "B: Raphael", "C: Leonardo da Vinci"], "C"),
+            9: ("Highest mountain in the world?", ["A: K2", "B: Mount Everest", "C: Kilimanjaro"], "B"),
+            10: ("How many continents are there?", ["A: 5", "B: 6", "C: 7"], "C"),
+            11: ("12 x 12?", ["A: 144", "B: 124", "C: 154"], "A"),
+            12: ("Square root of 64?", ["A: 6", "B: 8", "C: 10"], "B"),
+            13: ("What is 15% of 200?", ["A: 25", "B: 30", "C: 35"], "B"),
+            14: ("What is the angle sum of a triangle?", ["A: 180°", "B: 360°", "C: 90°"], "A"),
+            15: ("What is 7 to the power of 2?", ["A: 14", "B: 49", "C: 21"], "B"),
+            16: ("In what year did the Berlin Wall fall?", ["A: 1989", "B: 1990", "C: 1991"], "A"),
+            17: ("Who was the first Chancellor of Germany?", ["A: Willy Brandt", "B: Konrad Adenauer", "C: Helmut Schmidt"], "B"),
+            18: ("When did World War II end?", ["A: 1944", "B: 1945", "C: 1946"], "B"),
+            19: ("When was the Roman Empire founded?", ["A: 753 BC", "B: 500 BC", "C: 300 BC"], "A"),
+            20: ("Who discovered America?", ["A: Magellan", "B: Columbus", "C: Vespucci"], "B"),
+            21: ("Chemical symbol for gold?", ["A: Go", "B: Gd", "C: Au"], "C"),
+            22: ("How many planets are there in the solar system?", ["A: 7", "B: 8", "C: 9"], "B"),
+            23: ("What is the speed of light?", ["A: 300,000 km/s", "B: 250,000 km/s", "C: 350,000 km/s"], "A"),
+            24: ("Who developed the theory of relativity?", ["A: Newton", "B: Einstein", "C: Hawking"], "B"),
+            25: ("How many bones does the human body have?", ["A: 206", "B: 216", "C: 196"], "A"),
+            26: ("Longest river in the world?", ["A: Amazon", "B: Nile", "C: Yangtze"], "B"),
+            27: ("Biggest ocean?", ["A: Atlantic", "B: Indian Ocean", "C: Pacific"], "C"),
+            28: ("Capital of Japan?", ["A: Tokyo", "B: Kyoto", "C: Osaka"], "A"),
+            29: ("How many states does Germany have?", ["A: 14", "B: 15", "C: 16"], "C"),
+            30: ("Biggest desert in the world?", ["A: Sahara", "B: Gobi", "C: Antarctica"], "C"),
+            31: ("'Thanks' in Spanish?", ["A: Merci", "B: Gracias", "C: Obrigado"], "B"),
+            32: ("'Hello' in Japanese?", ["A: Konnichiwa", "B: Annyeong", "C: Ni Hao"], "A"),
+            33: ("'See you' in French?", ["A: Adieu", "B: Au revoir", "C: Salut"], "B"),
+            34: ("'Good morning' in Italian?", ["A: Buongiorno", "B: Buonasera", "C: Ciao"], "A"),
+            35: ("How many letters does the German alphabet have?", ["A: 26", "B: 27", "C: 30"], "C"),
+            36: ("Who wrote 'Faust'?", ["A: Schiller", "B: Goethe", "C: Lessing"], "B"),
+            37: ("Capital of Australia?", ["A: Sydney", "B: Melbourne", "C: Canberra"], "C"),
+            38: ("How many strings does a guitar have?", ["A: 5", "B: 6", "C: 7"], "B"),
+            39: ("What animal is the fastest?", ["A: Cheetah", "B: Hawk", "C: Antelope"], "A"),
+            40: ("How many heart does an Octopus have?", ["A: 1", "B: 2", "C: 3"], "C"),
+        }
+
+        q_text, options, correct = questions.get(q_num, ("Error", [], "A"))
+        
+        prompt = f"Quiz #{q_num}/40\n\n{q_text}\n\n" + "\n".join(options)
+        answer = simpledialog.askstring(f"Quiz #{q_num}", prompt)
+
+        if not answer: return
+        answer = answer.strip().upper()
+
+        self.completed_quizzes.add(q_num)
+        
+        if q_num == 3 and answer == "A":
+            self.joker_val = max(0, self.joker_val - 1)
+            self.log_output("❌ Wrong! This is the stupidest answer i ever heard!!!!11!!11!!!!")
+            self.save_data()
+            return
+
+        if answer == correct:
+            self.joker_val += 1
+            messagebox.showinfo("Right! ✅", f"Well done! ({len(self.completed_quizzes)}/40 completed)")
+            self.log_output(f"✅ Quiz #{q_num} answered right: ({len(self.completed_quizzes)}/40 completed)")
+        else:
+            messagebox.showerror("Wrong ❌", f"the right Answer would be: {correct}")
+            self.log_output(f"❌ Quiz #{q_num} answered wrong ({len(self.completed_quizzes)}/40)")
+        
+        self.save_data()
+
+# --- START ---
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = EssensplanerApp(root)
+    root.mainloop()
